@@ -1,0 +1,57 @@
+apiVersion: 1.0.0
+metadata:
+  generateName: node-functions-
+
+projects:
+  - name: node-function
+    source:
+      type: git
+      location: "https://github.com/boson-project/node-ce-functions.git"
+      sparseCheckoutDir: templates/default
+
+components:
+  - type: dockerimage
+    image: registry.access.redhat.com/ubi8/ubi:latest
+    alias: build
+    mountSources: true
+    volumes:
+      - name: nodefuncpvc
+        containerPath: /deps
+
+  - type: dockerimage
+    alias: runtime
+    image: bosonproject/node-function:latest
+    memoryLimit: 1024Mi
+    mountSources: true
+    env:
+      - name: NODE_PATH
+        value: /deps
+    volumes:
+      - name: nodefuncpvc
+        containerPath: /deps
+    endpoints:
+      - name: "8080/tcp"
+        port: 8080
+
+commands:
+  - name: devBuild
+    actions:
+      - type: exec
+        component: build
+        command: npm install --production --no-package-lock
+        workdir: ${CHE_PROJECTS_ROOT}/node-function
+      - type: exec
+        component: build
+        command: if [ ! -d node_modules ] ; then mkdir node_modules; fi
+        workdir: ${CHE_PROJECTS_ROOT}/node-function
+      - type: exec
+        component: build
+        command: mv node_modules /deps/
+        workdir: ${CHE_PROJECTS_ROOT}/node-function
+
+  - name: devRun
+    actions:
+      - type: exec
+        component: runtime
+        command: nodemon app.js
+        workdir: ${CHE_PROJECTS_ROOT}/node-function
