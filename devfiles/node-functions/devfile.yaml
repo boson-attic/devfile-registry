@@ -12,6 +12,7 @@ projects:
 components:
   - type: dockerimage
     image: registry.access.redhat.com/ubi8/ubi:latest
+    memoryLimit: 1024Mi
     alias: build
     mountSources: true
     volumes:
@@ -20,7 +21,7 @@ components:
 
   - type: dockerimage
     alias: runtime
-    image: bosonproject/node-function:latest
+    image: docker.io/bosonproject/node-function:0.1
     memoryLimit: 1024Mi
     mountSources: true
     env:
@@ -38,20 +39,12 @@ commands:
     actions:
       - type: exec
         component: build
-        command: npm install --production --no-package-lock
-        workdir: ${CHE_PROJECTS_ROOT}/node-function
-      - type: exec
-        component: build
-        command: if [ ! -d node_modules ] ; then mkdir node_modules; fi
-        workdir: ${CHE_PROJECTS_ROOT}/node-function
-      - type: exec
-        component: build
-        command: mv node_modules /deps/
+        command: npm install --production --no-package-lock; if [ ! -d node_modules ] ; then mkdir node_modules; fi; mv node_modules /deps/
         workdir: ${CHE_PROJECTS_ROOT}/node-function
 
   - name: devRun
     actions:
       - type: exec
         component: runtime
-        command: nodemon app.js
+        command: node index.js
         workdir: ${CHE_PROJECTS_ROOT}/node-function
