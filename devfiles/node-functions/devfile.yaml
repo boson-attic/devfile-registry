@@ -11,24 +11,26 @@ projects:
 
 components:
   - type: dockerimage
-    image: registry.access.redhat.com/ubi8/ubi:latest
+    image: registry.access.redhat.com/ubi8/nodejs-12:latest
     memoryLimit: 1024Mi
+    command: ['tail']
+    args: ['-f', '/dev/null']
     alias: build
     mountSources: true
     volumes:
-      - name: nodefuncpvc
+      - name: node-modules
         containerPath: /deps
 
   - type: dockerimage
     alias: runtime
-    image: docker.io/bosonproject/node-function:0.1
+    image: docker.io/bosonproject/node-function-runtime:0.1
     memoryLimit: 1024Mi
     mountSources: true
     env:
       - name: NODE_PATH
         value: /deps
     volumes:
-      - name: nodefuncpvc
+      - name: node-modules
         containerPath: /deps
     endpoints:
       - name: "8080/tcp"
