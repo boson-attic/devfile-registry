@@ -23,12 +23,12 @@ components:
 
   - type: dockerimage
     alias: runtime
-    image: docker.io/bosonproject/node-function-runtime:0.1
+    image: docker.io/bosonproject/node-function-runtime:v0.0.1
     memoryLimit: 1024Mi
     mountSources: true
     env:
       - name: NODE_PATH
-        value: /deps
+        value: /deps/node_modules
     volumes:
       - name: node-modules
         containerPath: /deps
@@ -41,12 +41,12 @@ commands:
     actions:
       - type: exec
         component: build
-        command: npm install --production --no-package-lock; if [ ! -d node_modules ] ; then mkdir node_modules; fi; mv node_modules /deps/
         workdir: ${CHE_PROJECTS_ROOT}/node-function
+        command: npm install --production --no-package-lock; if [ -d node_modules ] ; then mv node_modules /deps/; fi
 
   - name: devRun
     actions:
       - type: exec
         component: runtime
-        command: node index.js
-        workdir: ${CHE_PROJECTS_ROOT}/node-function
+        workdir: /invoker
+        command: npm start
