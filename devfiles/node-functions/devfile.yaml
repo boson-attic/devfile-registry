@@ -23,7 +23,7 @@ components:
 
   - type: dockerimage
     alias: runtime
-    image: docker.io/bosonproject/node-function-runtime:v0.0.1
+    image: docker.io/bosonproject/node-function-invoker:v0.0.1
     memoryLimit: 1024Mi
     mountSources: true
     env:
